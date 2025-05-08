@@ -1,0 +1,39 @@
+org: neurothrone
+service: eventbus-aws-node-http-api
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  iam:
+    statements:
+      - Effect: Allow
+        Action:
+          - events:PutEvents
+        Resource: "*"
+
+#resources:
+#  Resources:
+#    MyOwnEventBus:
+#      Type: AWS::Events::EventBus
+#      Properties:
+#        Name: "myOwnEventBus"
+
+functions:
+  producer:
+    handler: functions/producer/index.handler
+    events:
+      - httpApi:
+          path: /send
+          method: post
+
+  consumer:
+    handler: functions/consumer/index.handler
+    events:
+      - eventBridge:
+          enabled: true
+          eventBus: default
+          # eventBus: myOwnEventBus
+          pattern:
+            source:
+              - "my.test.event"
