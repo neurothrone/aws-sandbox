@@ -1,0 +1,22 @@
+@BaseApiUrl = your-api-url
+@ApiKey = your-api-key
+
+
+### Create a new excuse
+POST {{BaseApiUrl}}/excuses
+x-api-key: {{ApiKey}}
+Content-Type: application/json
+
+{
+  "text": "Aliens abducted my homework."
+}
+
+
+### Get all excuses
+GET {{BaseApiUrl}}/excuses
+x-api-key: {{ApiKey}}
+
+
+### Get a random excuse
+GET {{BaseApiUrl}}/excuses/random
+x-api-key: {{ApiKey}}

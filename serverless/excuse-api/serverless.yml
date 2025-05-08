@@ -1,0 +1,98 @@
+org: neurothrone
+service: excuse-api
+
+package:
+  individually: true
+  exclude:
+    - "**"
+
+custom:
+  esbuild:
+    minify: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  stage: dev
+  iam:
+    role: arn:aws:iam::<your-account-id>:role/serverless-role
+  environment:
+    EXCUSE_TABLE: ExcusesTable
+  apiGateway:
+    apiKeys:
+      - excuseApiKey
+
+functions:
+  createExcuse:
+    name: createExcuse
+    handler: functions/create-excuse/index.handler
+    package:
+      include:
+        - functions/create-excuse/**
+    events:
+      - http:
+          path: /excuses
+          method: post
+          private: true
+
+  getExcuses:
+    name: getExcuses
+    handler: functions/get-excuses/index.handler
+    package:
+      include:
+        - functions/get-excuses/**
+    events:
+      - http:
+          path: /excuses
+          method: get
+          private: true
+
+  getRandomExcuse:
+    name: getRandomExcuse
+    handler: functions/get-random-excuse/index.handler
+    package:
+      include:
+        - functions/get-random-excuse/**
+    events:
+      - http:
+          path: /excuses/random
+          method: get
+          private: true
+
+  onExcuseUsed:
+    name: onExcuseUsed
+    handler: functions/on-excuse-used/index.handler
+    package:
+      include:
+        - functions/on-excuse-used/**
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - "excuses.api"
+            detail-type:
+              - "ExcuseUsed"
+
+resources:
+  Resources:
+    ExcusesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ExcusesTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+
+outputs:
+  ApiKeyValue:
+    Description: "API Key for accessing the Excuse API"
+    Value:
+      Fn::GetAtt:
+        - ApiGatewayApiKey1
+        - Value
