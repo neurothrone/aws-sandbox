@@ -1,0 +1,56 @@
+org: neurothrone
+service: auth-aws-node-http-api
+
+package:
+  individually: true
+
+custom:
+  esbuild:
+    minify: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  iam:
+    role: arn:aws:iam::149536493722:role/serverless-role
+
+functions:
+  login:
+    handler: functions/login/index.handler
+    package:
+      patterns:
+        - "functions/login/**"
+        - "!functions/register/**"
+    events:
+      - httpApi:
+          path: /login
+          method: post
+  register:
+    handler: functions/register/index.handler
+    package:
+      patterns:
+        - "functions/register/**"
+        - "!functions/login/**"
+    events:
+      - httpApi:
+          path: /register
+          method: post
+
+resources:
+  Resources:
+    accounts:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: accounts
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+        #  - AttributeName: sk
+        #    AttributeType: S
+        KeySchema:
+          - AttributeName: pk # HAS says pk is a partition key
+            KeyType: HASH
+        #  - AttributeName: sk
+        #    KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
