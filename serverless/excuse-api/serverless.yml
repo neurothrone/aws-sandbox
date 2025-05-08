@@ -22,6 +22,10 @@ provider:
   apiGateway:
     apiKeys:
       - excuseApiKey
+#    usagePlan:
+#      throttle:
+#        rateLimit: 10
+#        burstLimit: 2
 
 functions:
   createExcuse:
